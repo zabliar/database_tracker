@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IG 即時統計</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h2>最新 IG 統計圖（自動更新）</h2>
+    <canvas id="pieChart" width="400" height="400"></canvas>
+
+    <script>
+        const ctx = document.getElementById('pieChart').getContext('2d');
+        let pieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Followers', 'Likes', 'Comments'],
+                datasets: [{
+                    data: [0, 0, 0],
+                    backgroundColor: ['#36A2EB', '#4BC0C0', '#FF6384'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: '粉絲數 / 按讚數 / 留言數 比例' }
+                }
+            }
+        });
+
+        async function updateChart() {
+            const response = await fetch('/api/data');
+            const data = await response.json();
+            if (!data.error) {
+                pieChart.data.datasets[0].data = [data.followers, data.likes, data.comments];
+                pieChart.update();
+            }
+        }
+
+        // 每 10 秒更新一次
+        setInterval(updateChart, 10000);
+        // 頁面載入後馬上執行一次
+        updateChart();
+    </script>
+</body>
+</html>
